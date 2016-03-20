@@ -31,7 +31,10 @@ MockDataSnapshot.prototype.exists = function () {
 
 MockDataSnapshot.prototype.forEach = function (callback, context) {
   _.each(this.val(), function (value, key) {
-    callback.call(context, this.child(key));
+    var retVal = callback.call(context, this.child(key));
+    if (retVal === true) {
+      return false;
+    }
   }, this);
 };
 
