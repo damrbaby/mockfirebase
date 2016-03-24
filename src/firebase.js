@@ -159,6 +159,7 @@ MockFirebase.prototype.set = function (data, callback) {
       this._dataChanged(data);
     }
     if (callback) callback(err);
+    return Promise.resolve();
   });
 };
 
@@ -221,6 +222,7 @@ MockFirebase.prototype.push = function (data, callback) {
   if (arguments.length && data !== null) {
     // currently, callback only invoked if child exists
     child.set(data, callback);
+    return Promise.resolve();
   }
   return child;
 };
