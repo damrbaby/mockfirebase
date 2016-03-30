@@ -323,7 +323,7 @@ MockFirebase.prototype./**
  * Just a stub at this point.
  * @param {int} limit
  */
-limit = function (limit) {
+limitToFirst = function (limit) {
   return new Query(this).limit(limit);
 };
 
