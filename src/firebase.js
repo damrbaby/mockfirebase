@@ -326,6 +326,9 @@ MockFirebase.prototype./**
 limitToFirst = function (limit) {
   return new Query(this).limit(limit);
 };
+MockFirebase.prototype.limitToLast = function (limit) {
+  return new Query(this).limit(limit);
+};
 
 MockFirebase.prototype.startAt = function (priority, key) {
   return new Query(this).startAt(priority, key);
