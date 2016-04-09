@@ -153,14 +153,16 @@ MockFirebase.prototype.child = function (childPath) {
 
 MockFirebase.prototype.set = function (data, callback) {
   var err = this._nextErr('set');
+  var deferred = Promise.defer();
   data = _.cloneDeep(data);
   this._defer('set', _.toArray(arguments), function() {
     if (err === null) {
       this._dataChanged(data);
     }
     if (callback) callback(err);
-    return Promise.resolve();
+    deferred.resolve();
   });
+  return deferred.promise;
 };
 
 MockFirebase.prototype.update = function (changes, callback) {
@@ -186,7 +188,7 @@ MockFirebase.prototype.setPriority = function (newPriority, callback) {
 
 MockFirebase.prototype.setWithPriority = function (data, pri, callback) {
   this.setPriority(pri);
-  this.set(data, callback);
+  return this.set(data, callback);
 };
 
 MockFirebase.prototype.key = function () {
@@ -306,22 +308,23 @@ MockFirebase.prototype.off = function (event, callback, context) {
       });
     }
     else {
-      this._events[event] = [];      
+      this._events[event] = [];
     }
   }
 };
 
 MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally) {
+  var deferred = Promise.defer();
   this._defer('transaction', _.toArray(arguments), function () {
     var err = this._nextErr('transaction');
     var res = valueFn(this.getData());
     var newData = _.isUndefined(res) || err? this.getData() : res;
     this._dataChanged(newData);
     if (typeof finishedFn === 'function') {
-      finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority));
+      deferred.resolve(finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority)));
     }
   });
-  return [valueFn, finishedFn, applyLocally];
+  return Promise.resolve();
 };
 
 MockFirebase.prototype./**
