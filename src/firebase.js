@@ -234,19 +234,24 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
     cancel = _.noop;
   }
   cancel = cancel || _.noop;
+  callback = callback || _.noop;
   var err = this._nextErr('once');
+  var deferred = Promise.defer();
   if (err) {
     this._defer('once', _.toArray(arguments), function () {
       cancel.call(context, err);
+      deferred.reject(err);
     });
   }
   else {
     var fn = _.bind(function (snapshot) {
       this.off(event, fn, context);
       callback.call(context, snapshot);
+      deferred.resolve(snapshot);
     }, this);
     this._on('once', event, fn, cancel, context);
   }
+  return deferred.promise;
 };
 
 MockFirebase.prototype.remove = function (callback) {
