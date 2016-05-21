@@ -257,14 +257,16 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
 };
 
 MockFirebase.prototype.remove = function (callback) {
+  var deferred = Promise.defer();
   var err = this._nextErr('remove');
   this._defer('remove', _.toArray(arguments), function () {
     if (err === null) {
       this._dataChanged(null);
     }
     if (callback) callback(err);
+    deferred.resolve();
   });
-  return this;
+  return deferred.promise;
 };
 
 MockFirebase.prototype.on = function (event, callback, cancel, context) {
