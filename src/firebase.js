@@ -168,6 +168,7 @@ MockFirebase.prototype.set = function (data, callback) {
 MockFirebase.prototype.update = function (changes, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
   var err = this._nextErr('update');
+  var deferred = Promise.defer();
   this._defer('update', _.toArray(arguments), function () {
     if (!err) {
       var base = this.getData();
@@ -175,7 +176,9 @@ MockFirebase.prototype.update = function (changes, callback) {
       this._dataChanged(data);
     }
     if (callback) callback(err);
+    deferred.resolve();
   });
+  return deferred.promise;
 };
 
 MockFirebase.prototype.setPriority = function (newPriority, callback) {
