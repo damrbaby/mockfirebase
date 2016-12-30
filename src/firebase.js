@@ -324,12 +324,15 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
     var err = this._nextErr('transaction');
     var res = valueFn(this.getData());
     var newData = _.isUndefined(res) || err? this.getData() : res;
+    var committed = err === null && !_.isUndefined(res);
+    var snapshot = new Snapshot(this, newData, this.priority);
     this._dataChanged(newData);
     if (typeof finishedFn === 'function') {
-      deferred.resolve(finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority)));
+      finishedFn(err, committed, snapshot);
     }
+    err ? deferred.reject(err) : deferred.resolve({ committed: committed, snapshot: snapshot });
   });
-  return Promise.resolve();
+  return deferred.promise;
 };
 
 MockFirebase.prototype./**
