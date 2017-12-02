@@ -10,6 +10,19 @@ var utils    = require('./utils');
 var Auth     = require('./auth');
 var validate = require('./validators');
 
+function defer() {
+  var resolve, reject;
+  var promise = new Promise(function() {
+    resolve = arguments[0];
+    reject = arguments[1];
+  });
+  return {
+    resolve: resolve,
+    reject: reject,
+    promise: promise
+  };
+}
+
 function MockFirebase (path, data, parent, name) {
   this.path = path || 'Mock://';
   this.errs = {};
@@ -153,7 +166,7 @@ MockFirebase.prototype.child = function (childPath) {
 
 MockFirebase.prototype.set = function (data, callback) {
   var err = this._nextErr('set');
-  var deferred = Promise.defer();
+  var deferred = defer();
   data = _.cloneDeep(data);
   this._defer('set', _.toArray(arguments), function() {
     if (err === null) {
@@ -168,7 +181,7 @@ MockFirebase.prototype.set = function (data, callback) {
 MockFirebase.prototype.update = function (changes, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
   var err = this._nextErr('update');
-  var deferred = Promise.defer();
+  var deferred = defer();
   this._defer('update', _.toArray(arguments), function () {
     if (!err) {
       var base = this.getData();
@@ -241,7 +254,7 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
   cancel = cancel || _.noop;
   callback = callback || _.noop;
   var err = this._nextErr('once');
-  var deferred = Promise.defer();
+  var deferred = defer();
   if (err) {
     this._defer('once', _.toArray(arguments), function () {
       cancel.call(context, err);
@@ -260,7 +273,7 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
 };
 
 MockFirebase.prototype.remove = function (callback) {
-  var deferred = Promise.defer();
+  var deferred = defer();
   var err = this._nextErr('remove');
   this._defer('remove', _.toArray(arguments), function () {
     if (err === null) {
@@ -319,7 +332,7 @@ MockFirebase.prototype.off = function (event, callback, context) {
 };
 
 MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally) {
-  var deferred = Promise.defer();
+  var deferred = defer();
   this._defer('transaction', _.toArray(arguments), function () {
     var err = this._nextErr('transaction');
     var res = valueFn(this.getData());
